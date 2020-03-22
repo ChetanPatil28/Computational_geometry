@@ -4,7 +4,7 @@ import traceback
 
 
 class ConvexHull:
-    def __init__(self, max_span = 500, num_points = 25):
+    def __init__(self, max_span = 500, num_points = 25, show_working = True):
         self.show_process = False
         self.span = max_span
         self.blank = np.zeros(shape = (self.span,self.span,3),dtype = np.uint8)
@@ -18,6 +18,7 @@ class ConvexHull:
         self.hull_points = None
         self.final_hull_points = None
         self.draw_points = True
+        self.show_working = show_working
 
     def orientation(self, p1,p2,p3):
         return   (p2[0]-p1[0])*(p3[1]-p1[1])-(p2[1]-p1[1])*(p3[0]-p1[0])
@@ -40,7 +41,7 @@ class ConvexHull:
             for i,point in enumerate(self.sorted_points):
                 cv2.circle(self.blank2,(point[0],point[1]),2,(0,0,255),-1)
 
-
+        self.blank3 = self.blank2.copy()
 
     def scan(self):
         self.hull_points =[np.asarray(self.bottom_point),self.sorted_points[0]]
@@ -48,9 +49,15 @@ class ConvexHull:
         while(i<len(self.sorted_points)):            
             dirr = self.orientation(self.hull_points[-2],self.hull_points[-1],self.sorted_points[i])
             if dirr<0:
+                if self.show_working:
+                    cv2.line(self.blank3,(self.hull_points[-2][0], self.hull_points[-2][1]),(self.hull_points[-1][0], self.hull_points[-1][1]),(0,255,0),1,1)
+                    cv2.line(self.blank3,(self.hull_points[-1][0], self.hull_points[-1][1]),(self.sorted_points[i][0],self.sorted_points[i][1]),(0,255,0),1,1)
                 self.hull_points.append(self.sorted_points[i])
                 
             elif dirr>0:
+                if self.show_working:
+                    cv2.line(self.blank3,(self.hull_points[-2][0], self.hull_points[-2][1]),(self.hull_points[-1][0], self.hull_points[-1][1]),(0,255,0),1,1)
+                    cv2.line(self.blank3,(self.hull_points[-1][0], self.hull_points[-1][1]),(self.sorted_points[i][0], self.sorted_points[i][1]),(0,0,255),1,1)
                 del self.hull_points[-1]
                 self.hull_points.append(self.sorted_points[i])
                 concave = True
@@ -65,6 +72,10 @@ class ConvexHull:
 
             i+=1
 
+            cv2.imshow("convex_hull_process",self.blank3)
+            cv2.waitKey(100)
+    
+        cv2.destroyAllWindows()
         self.final_hull_points =  self.hull_points = [i.tolist() for i in self.hull_points]
         self.hull_points.append(self.hull_points[0])
 
