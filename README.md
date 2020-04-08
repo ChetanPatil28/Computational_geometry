@@ -1,5 +1,6 @@
 # Computational_geometry
-Repo for all Computational-Geometric algorithms
+
+DONE
 
 Graham-Scan implementation of finding the Convex Hull for a given set of points in a 2-D plane.
 
